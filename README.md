@@ -9,3 +9,5 @@ Once you input something in the text input box, the webpage combines each provin
 ## Helpful resources
 - I learned how to use Baidu Search Suggestion API from [jsonp跨越请求百度搜索api 实现下拉列表提示](http://www.yaoguangkeji.com/a_obQ6O5G3.html)
 - The background map of China is a product of my other project: [D3-China-Map](https://github.com/little006/D3-China-map)
+- Chris Nielsen's [JSON visualization tool](http://chris.photobooks.com/json/default.htm) is extremely helpful when working with JSON data.
+- [This blog](http://www.cnblogs.com/woider/p/5805248.html) lists search word suggestion APIs from many other search engines (Google, Bing, etc.)
