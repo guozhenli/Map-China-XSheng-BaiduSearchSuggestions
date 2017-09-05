@@ -82,7 +82,7 @@ var provinceNameList = ['甘肃', '青海', '广西', '贵州', '重庆', '北�
 function searchBaiduForProvince(prov){
     var userInputStr = document.getElementById("userInput").value;
     var baiduScript = document.createElement('script');
-    var baiduURL = "http://suggestion.baidu.com/su?wd=" + prov + userInputStr + "&cb=updateLabelsPerBaidu";
+    var baiduURL = "https://sp0.baidu.com/5a1Fazu8AA54nxGko9WTAnF6hhy/su?wd=" + prov + userInputStr + "&cb=updateLabelsPerBaidu";
     baiduScript.src = baiduURL;
     document.body.appendChild(baiduScript);
 }
