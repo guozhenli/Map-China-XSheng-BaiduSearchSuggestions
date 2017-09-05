@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<style>
+.provinces {
+    fill: #ccc;
+    stroke: #fff;
+}
+
+.provinces :hover {
+    fill: chocolate;
+}
+
+.province-label {
+  fill: #000;
+  font-size: 0.8em;
+  font-weight: 300;
+  font-family: Arial, Helvetica, sans-serif;
+  text-anchor: middle;
+}
+</style>
+
+<body>
+<span>（百度自动补全）X省</span>
+<input type="text" id="userInput" onchange="updateProvinceLabels()">
+<span>......</span><br>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="https://unpkg.com/topojson@3"></script>
+<script>
+var w = 1080, h = 960;
+
+var svg = d3.select("body").append("svg")
+            .attr("width", w)
+            .attr("height", h);
+
+var myMercatorProjection = d3.geoMercator()
+                        .center([107, 31])
+                        .scale(850)
+                        .translate([w/2, h/2]);
+
+var myAlbersProjection = d3.geoConicEqualArea()
+                            .center([105, 35])
+                            .parallels([27, 45])
+                            .scale(1000)
+                            .translate([w/2, h/2]);
+
+var path_gen = d3.geoPath().projection(myMercatorProjection)
+
+
+d3.json("china_topo_quantized.json", function(error, china){
+    if (error) return console.error(error);
+    // console.log(china);
+    china_features = topojson.feature(china, china.objects.provinces).features;
+    // console.log(china_features);
+    // china_features.forEach(function(prov, index){
+    //     console.log(index + ":" + prov.properties.engName); 
+    // });
+    svg.append("g")
+        .attr("class", "provinces")
+        .selectAll("path")
+        .data(china_features)
+        .enter()
+        .append("path")
+        .attr("d", path_gen);
+
+    svg.append("g")
+        .attr("class", "province-labels")
+        .selectAll(".province-label")
+        .data(china_features)
+        .enter()
+        .append("text")
+        .attr("class", "province-label")
+        .attr("transform", function(d){return "translate("+path_gen.centroid(d)+")";})
+        .attr("dy",".35em")
+        .text(function(d){return d.properties.engName});
+
+});
+
+
+var provinceNameList = ['甘肃', '青海', '广西', '贵州', '重庆', '北京', '福建', '安徽', '广东', '西藏', '新疆', '海南', '宁夏', '陕西', '山西', '湖北', '湖南', '四川', '云南', '河北', '河南', '辽宁', '山东', '天津', '江西', '江苏', '上海', '浙江', '吉林', '内蒙古', '黑龙江', '香港', '澳门', '台湾'];
+
+function searchBaiduForProvince(prov){
+    var userInputStr = document.getElementById("userInput").value;
+    var baiduScript = document.createElement('script');
+    var baiduURL = "http://suggestion.baidu.com/su?wd=" + prov + userInputStr + "&cb=updateLabelsPerBaidu";
+    baiduScript.src = baiduURL;
+    document.body.appendChild(baiduScript);
+}
+
+function updateProvinceLabels(){
+    provinceNameList.forEach(searchBaiduForProvince);
+}
+
+function findProvinceName(str, provNameList){
+    // console.log("Searching for province name in "+str);
+    for (i=0; i<provNameList.length; i++){
+        var p = provNameList[i];
+        // console.log(p);
+        if (str.search(p)>=0) return p;
+    }
+    return "";
+}
+
+function updateLabelsPerBaidu(baiduResponse){
+    // console.log(baiduResponse);
+    var q = baiduResponse.q;
+    var provName = findProvinceName(q, provinceNameList);
+    var provPos = provinceNameList.indexOf(provName);
+    // console.log(provPos + ":" + provName);
+    var provLabel = baiduResponse.s  // 
+                .slice(0,2)
+                .map(function(item){return item.replace(q,'')})
+                .join('/');
+    // console.log(provPos + ":" + provName + ":" + provLabel);
+
+    var selector = ".province-label:nth-child(" + (provPos+1) + ")";
+    // console.log(selector);
+    d3.select(selector)
+        .text(provLabel);
+}
+
+
+</script>
+</body>
