@@ -84,10 +84,18 @@ function searchBaiduForProvince(prov){
     var baiduScript = document.createElement('script');
     var baiduURL = "https://sp0.baidu.com/5a1Fazu8AA54nxGko9WTAnF6hhy/su?wd=" + prov + userInputStr + "&cb=updateLabelsPerBaidu";
     baiduScript.src = baiduURL;
+    baiduScript.setAttribute("class", "baidu");
     document.body.appendChild(baiduScript);
 }
 
 function updateProvinceLabels(){
+    // First, remove previously generated Baidu API scripts, if there is any. 
+    // (So that the webpage won't be generateing a whole bunch of new <script> elements each time we change query word.)
+    baiduScriptNodes = document.body.getElementsByClassName("baidu")
+    while (baiduScriptNodes[0]) {
+        baiduScriptNodes[0].parentNode.removeChild(baiduScriptNodes[0]);
+    }
+
     provinceNameList.forEach(searchBaiduForProvince);
 }
 
@@ -107,16 +115,17 @@ function updateLabelsPerBaidu(baiduResponse){
     var provName = findProvinceName(q, provinceNameList);
     var provPos = provinceNameList.indexOf(provName);
     // console.log(provPos + ":" + provName);
-    var provLabel = baiduResponse.s  // 
-                .slice(0,2)
-                .map(function(item){return item.replace(q,'')})
-                .join('/');
+    var provLabel = baiduResponse.s                                 // get the 's' element of Baidu's response
+                .slice(0,2)                                         // only take the first 2 suggestions
+                .map(function(item){return item.replace(q,'')})     // remove the query word itself
+                .join('/');                                         // paste results into one string
     // console.log(provPos + ":" + provName + ":" + provLabel);
 
     var selector = ".province-label:nth-child(" + (provPos+1) + ")";
     // console.log(selector);
     d3.select(selector)
         .text(provLabel);
+
 }
 
 
