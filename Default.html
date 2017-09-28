@@ -1,29 +1,48 @@
 <!DOCTYPE html>
-<meta charset="utf-8">
+<head>
+    <title>百度X省</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <style>
+        .provinces {
+            fill: #ccc;
+            stroke: #fff;
+        }
 
-<style>
-.provinces {
-    fill: #ccc;
-    stroke: #fff;
-}
+        .provinces :hover {
+            fill: chocolate;
+        }
 
-.provinces :hover {
-    fill: chocolate;
-}
-
-.province-label {
-  fill: #000;
-  font-size: 0.8em;
-  font-weight: 300;
-  font-family: Arial, Helvetica, sans-serif;
-  text-anchor: middle;
-}
-</style>
+        .province-label {
+          fill: #000;
+          font-size: 0.8em;
+          font-weight: 300;
+          font-family: Arial, Helvetica, sans-serif;
+          text-anchor: middle;
+        }
+    </style>
+</head>
 
 <body>
-<span>（百度自动补全）X省</span>
-<input type="text" id="userInput" onchange="updateProvinceLabels()">
-<span>......</span><br>
+    <div class="w3-container">
+        <div class="w3-row">
+            <h3 class="w3-col">在下面输入任意词，地图上会显示“省名+你输入的词”在百度搜索时，百度建议你补全的词语</h3>
+        </div>
+        <div class="w3-row">
+            <p class="w3-col">例如输入：“为什么”</p>
+        </div>
+        <div class="w3-row">
+            <div class="w3-col" style="width: 40px">
+                <h3>X省</h3>
+            </div>
+            <div class="w3-rest">
+                <input class="w3-input w3-border w3-hover-light-gray" type="text" id="userInput" onchange="updateProvinceLabels()" style="width: 40%">
+            </div>
+        </div>
+    </div>
+    
+    
+
 <script src="https://d3js.org/d3.v4.min.js"></script>
 <script src="https://unpkg.com/topojson@3"></script>
 <script>
