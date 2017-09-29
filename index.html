@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<head>
+    <title>百度X省</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <style>
+        .provinces {
+            fill: #ccc;
+            stroke: #fff;
+        }
+
+        .provinces :hover {
+            fill: chocolate;
+        }
+
+        .province-label {
+          fill: #000;
+          font-size: 0.8em;
+          font-weight: 300;
+          font-family: Arial, Helvetica, sans-serif;
+          text-anchor: middle;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="w3-container">
+        <div class="w3-row">
+            <h3 class="w3-col">在下面输入任意词，地图上会显示在百度搜索“省名+你输入的词”时，百度建议你补全的词语</h3>
+        </div>
+        <div class="w3-row">
+            <p class="w3-col">例如输入：“为什么”</p>
+        </div>
+        <div class="w3-container">
+            <div class="w3-cell w3-cell-middle" style="padding-right: 4px">
+                <h4>X省</h4>
+            </div>
+            <div class="w3-cell w3-cell-middle">
+                <input class="w3-input w3-hover-light-gray" type="text" id="userInput" onchange="updateProvinceLabels()">
+            </div>
+        </div>
+    </div>
+    
+    
+
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="https://unpkg.com/topojson@3"></script>
+<script>
+var w = 1080, h = 960;
+
+var svg = d3.select("body").append("svg")
+            .attr("width", w)
+            .attr("height", h);
+
+var myMercatorProjection = d3.geoMercator()
+                        .center([107, 31])
+                        .scale(850)
+                        .translate([w/2, h/2]);
+
+var path_gen = d3.geoPath().projection(myMercatorProjection)
+
+d3.json("china_topo_quantized.json", function(error, china){
+    if (error) return console.error(error);
+    // console.log(china);
+    china_features = topojson.feature(china, china.objects.provinces).features;
+    // console.log(china_features);
+    // china_features.forEach(function(prov, index){
+    //     console.log(index + ":" + prov.properties.engName); 
+    // });
+    svg.append("g")
+        .attr("class", "provinces")
+        .selectAll("path")
+        .data(china_features)
+        .enter()
+        .append("path")
+        .attr("d", path_gen);
+
+    svg.append("g")
+        .attr("class", "province-labels")
+        .selectAll("text")
+        .data(china_features)
+        .enter()
+        .append("text")
+        .attr("class", "province-label")
+        .attr("transform", function(d){return "translate("+path_gen.centroid(d)+")";})
+        .attr("dy",".35em")
+        .text(function(d, i){return provinceNameList[i]});
+        // .text(function(d){return d.properties.engName});
+
+});
+
+
+var provinceNameList = ['甘肃', '青海', '广西', '贵州', '重庆', '北京', '福建', '安徽', '广东', '西藏', '新疆', '海南', '宁夏', '陕西', '山西', '湖北', '湖南', '四川', '云南', '河北', '河南', '辽宁', '山东', '天津', '江西', '江苏', '上海', '浙江', '吉林', '内蒙古', '黑龙江', '香港', '澳门', '台湾'];
+
+function searchBaiduForProvince(prov){
+    var userInputStr = document.getElementById("userInput").value;
+    var baiduScript = document.createElement('script');
+    var baiduURL = "https://sp0.baidu.com/5a1Fazu8AA54nxGko9WTAnF6hhy/su?wd=" + prov + userInputStr + "&cb=updateLabelsPerBaidu";
+    baiduScript.src = baiduURL;
+    baiduScript.setAttribute("class", "baidu");
+    document.body.appendChild(baiduScript);
+}
+
+function updateProvinceLabels(){
+    // First, remove previously generated Baidu API scripts, if there is any. 
+    // (So that the webpage won't be generateing a whole bunch of new <script> elements each time we change query word.)
+    baiduScriptNodes = document.body.getElementsByClassName("baidu")
+    while (baiduScriptNodes[0]) {
+        baiduScriptNodes[0].parentNode.removeChild(baiduScriptNodes[0]);
+    }
+
+    provinceNameList.forEach(searchBaiduForProvince);
+}
+
+function findProvinceName(str, provNameList){
+    // console.log("Searching for province name in "+str);
+    for (i=0; i<provNameList.length; i++){
+        var p = provNameList[i];
+        // console.log(p);
+        if (str.search(p)>=0) return p;
+    }
+    return "";
+}
+
+function updateLabelsPerBaidu(baiduResponse){
+    // console.log(baiduResponse);
+    var q = baiduResponse.q;
+    var provName = findProvinceName(q, provinceNameList);
+    var provPos = provinceNameList.indexOf(provName);
+    // console.log(provPos + ":" + provName);
+    var provLabel = baiduResponse.s                                 // get the 's' element of Baidu's response
+                .slice(0,2)                                         // only take the first 2 suggestions
+                .map(function(item){return item.replace(q,'')})     // remove the query word itself
+                .join('/');                                         // paste results into one string
+    // console.log(provPos + ":" + provName + ":" + provLabel);
+
+    var selector = ".province-label:nth-child(" + (provPos+1) + ")";
+    // console.log(selector);
+    d3.select(selector)
+        .text(provLabel);
+
+}
+
+
+</script>
+</body>
